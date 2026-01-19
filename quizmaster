@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuizMaster - Pattao National High School</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #fffaf7 0%, #ffffff 100%);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex justify-center items-center">
+
+<div class="max-w-3xl w-full bg-white p-6 rounded shadow">
+
+  <h1 class="text-3xl font-bold text-center text-maroon-800">QuizMaster</h1>
+  <p class="text-center mb-6">Pattao National High School</p>
+
+  <!-- ================= START PAGE ================= -->
+  <div id="startPage" class="space-y-4">
+    <input id="studentName" class="border p-2 rounded w-full" placeholder="Student Name">
+    <input id="teacherName" class="border p-2 rounded w-full" placeholder="Teacher Name">
+
+    <div class="grid grid-cols-2 gap-4">
+      <input id="gradeLevel" class="border p-2 rounded" placeholder="Grade Level">
+      <input id="section" class="border p-2 rounded" placeholder="Section">
+    </div>
+
+    <select id="subject" class="border p-2 rounded w-full">
+      <option value="">Select Subject</option>
+      <option>English</option>
+      <option>Mathematics</option>
+      <option>Science</option>
+      <option>Filipino</option>
+      <option>Araling Panlipunan</option>
+      <option>MAPEH</option>
+      <option selected>ICT</option>
+      <option>ESP</option>
+      <option>SHS Core Subject</option>
+      <option>SHS Applied Subject</option>
+      <option>SHS Specialized Subject</option>
+    </select>
+
+    <select id="gradingPeriod" class="border p-2 rounded w-full">
+      <option value="">Select Grading Period</option>
+      <option>First Quarter</option>
+      <option>Second Quarter</option>
+      <option>Third Quarter</option>
+      <option>Fourth Quarter</option>
+    </select>
+
+    <button onclick="startQuiz()"
+      class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+      Start Quiz
+    </button>
+  </div>
+
+  <!-- ================= QUIZ PAGE ================= -->
+  <div id="quizPage" class="hidden">
+    <div class="flex justify-between mb-4">
+      <div class="font-semibold">Score: <span id="score">0</span></div>
+      <div class="font-semibold">Time: <span id="timer">00:00</span></div>
+    </div>
+
+    <h2 id="question" class="text-lg font-bold mb-6"></h2>
+
+    <!-- 4 OPTION BOXES -->
+    <div id="options" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+  </div>
+
+  <!-- ================= RESULT PAGE ================= -->
+  <div id="resultPage" class="hidden text-center">
+    <h2 class="text-2xl font-bold mb-4">Quiz Result</h2>
+    <p id="finalScore"></p>
+    <p id="percentage"></p>
+    <p id="timeTaken"></p>
+  </div>
+
+  <footer class="text-center mt-6 text-gray-500 text-sm">
+    © 2025 Reynaldo P. Usigan, Mylene A. Baquiran, Queen Jamel Bautista
+  </footer>
+
+</div>
+
+<script>
+/* ================= ICT QUESTION BANK ================= */
+const QUESTIONS = [
+  {
+    q: "What does ICT stand for?",
+    options: [
+      "Information and Communication Technology",
+      "Internet and Computer Technique",
+      "Information Computer Technology",
+      "Integrated Communication Tool"
+    ],
+    answer: 0
+  },
+  {
+    q: "Which device is used to input data into a computer?",
+    options: ["Monitor", "Printer", "Keyboard", "Speaker"],
+    answer: 2
+  },
+  {
+    q: "What part of the computer is the brain?",
+    options: ["RAM", "Hard Drive", "Motherboard", "CPU"],
+    answer: 3
+  },
+  {
+    q: "Which is system software?",
+    options: ["Word", "Windows OS", "Chrome", "Photoshop"],
+    answer: 1
+  },
+  {
+    q: "Purpose of a firewall?",
+    options: [
+      "Cool computer",
+      "Protect from unauthorized access",
+      "Speed up PC",
+      "Store files"
+    ],
+    answer: 1
+  }
+];
+
+/* ================= VARIABLES ================= */
+let currentQuestion = 0;
+let score = 0;
+let seconds = 0;
+let timerInterval;
+
+/* ================= START QUIZ ================= */
+function startQuiz() {
+  if (
+    !studentName.value || !teacherName.value ||
+    !gradeLevel.value || !section.value ||
+    !subject.value || !gradingPeriod.value
+  ) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  document.getElementById("startPage").classList.add("hidden");
+  document.getElementById("quizPage").classList.remove("hidden");
+
+  startTimer();
+  loadQuestion();
+}
+
+/* ================= STOPWATCH TIMER ================= */
+function startTimer() {
+  timerInterval = setInterval(() => {
+    seconds++;
+    const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const secs = String(seconds % 60).padStart(2, "0");
+    document.getElementById("timer").textContent = `${mins}:${secs}`;
+  }, 1000);
+}
+
+/* ================= LOAD QUESTION ================= */
+function loadQuestion() {
+  const q = QUESTIONS[currentQuestion];
+  document.getElementById("question").textContent = q.q;
+
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  q.options.forEach((opt, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = opt;
+    btn.className = `
+      border rounded-lg p-4 text-center
+      font-medium transition
+      hover:bg-gray-100
+    `;
+    btn.onclick = () => selectAnswer(btn, index);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+/* ================= ANSWER HANDLING ================= */
+function selectAnswer(button, index) {
+  const correct = QUESTIONS[currentQuestion].answer;
+  const buttons = document.querySelectorAll("#options button");
+
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === correct) {
+      btn.classList.add("bg-green-500", "text-white");
+    }
+  });
+
+  if (index === correct) {
+    score++;
+    document.getElementById("score").textContent = score;
+  } else {
+    button.classList.add("bg-red-500", "text-white");
+  }
+
+  setTimeout(nextQuestion, 1300);
+}
+
+/* ================= NEXT QUESTION ================= */
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < QUESTIONS.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+}
+
+/* ================= SHOW RESULT ================= */
+function showResult() {
+  clearInterval(timerInterval);
+
+  document.getElementById("quizPage").classList.add("hidden");
+  document.getElementById("resultPage").classList.remove("hidden");
+
+  document.getElementById("finalScore").textContent =
+    `Score: ${score} / ${QUESTIONS.length}`;
+
+  document.getElementById("percentage").textContent =
+    `Percentage: ${(score / QUESTIONS.length * 100).toFixed(2)}%`;
+
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  document.getElementById("timeTaken").textContent =
+    `Time Taken: ${mins} minute(s) ${secs} second(s)`;
+}
+</script>
+
+</body>
+</html>
